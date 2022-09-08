@@ -2,6 +2,7 @@ from RNA import NeuralNetwork
 from ga import GA
 import numpy as np
 import multiprocessing as mp
+from torch import device
 
 
 def fitness(pesos, net):
@@ -18,8 +19,8 @@ def fitness(pesos, net):
 
 def main(args):
     core, pop = args
-    neural_net = NeuralNetwork()
-    ga = GA(pop_size=pop, chrom_size=9550, cross_rate=0.8, mutation_rate=0.5, max_iter=1000, mutation_estrategy="gaussian",
+    neural_net = NeuralNetwork().to(device("cuda"))
+    ga = GA(pop_size=pop, chrom_size=9550, cross_rate=0.8, mutation_rate=0.25, max_iter=1000, mutation_estrategy="gaussian",
             fitness_func=fitness, net=neural_net)
     ga.run(core)
 

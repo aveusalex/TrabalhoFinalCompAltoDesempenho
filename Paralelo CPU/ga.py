@@ -42,7 +42,7 @@ class GA:
         # a probabilidade de ser escolhido de acordo com seu fitness. Ou seja, implementacao da roleta.
         idx = np.random.choice(np.arange(len(pop)), size=self.pop_size, replace=False,
                                p=fitness / fitness.sum())
-        return pop[idx]
+        return pop[idx], fitness[idx]
 
     def crossover(self, pop, fitness):
         # aqui onde dois genes sao cruzados para gerar dois novos genes
@@ -87,14 +87,14 @@ class GA:
 
     def mutate(self, pop):
         if self.net:
-            fitness_0 = self.fitness(pop, self.net)
+            fitness_0 = 1 / self.fitness(pop, self.net)
         else:
             fitness_0 = self.fitness(pop)
 
         # atualizando o sigma
-        if self.porcentagem_sucesso > 0.25:
+        if self.porcentagem_sucesso > 0.12:
             self.sigma = self.sigma / 0.9
-        elif self.porcentagem_sucesso < 0.25:
+        elif self.porcentagem_sucesso < 0.12:
             self.sigma = self.sigma * 0.9
 
         for i in range(len(pop)):
@@ -107,7 +107,7 @@ class GA:
                     pop[i] = pop[i] + np.random.normal(0, self.sigma, self.chrom_size)
 
         if self.net:
-            fitness_1 = self.fitness(pop, self.net)
+            fitness_1 = 1 / self.fitness(pop, self.net)
         else:
             fitness_1 = self.fitness(pop)
 
@@ -120,28 +120,24 @@ class GA:
         # a sacada daqui foi verificar em quais lugares os fitness_1 foram maiores que os fitness_0 e verificar a porcentagem disso
         return np.sum(bools) / len(bools)
 
-    def evolve(self, pop):
-        if self.net:
-            fitness = self.fitness(pop, self.net)  # fitness com rede neural
-        else:
-            fitness = self.fitness(pop)
-
-        pop = self.crossover(pop, fitness)  # cruzamento, o fitness é avaliado no inicio da funcao mutate
+    def evolve(self, pop, fitness):
+        fitness = 1/fitness
+        pop = self.crossover(pop, fitness)  # cruzamento, o fitness dos cross são avaliados no inicio da funcao mutate
         pop, fitness = self.mutate(pop)  # já retorna o fitness dos cromossomos mutados
 
-        pop = self.select(pop, fitness)
-        return pop
+        pop, fitness = self.select(pop, fitness)
+        return pop, fitness  # ja retorna a populacao escolhida dessa geracao e seus fitness
 
     def run(self, core):
         print(f"Iniciando a evolucao core - {core}")
         pop = self.init_pop()
         start = time.time()
+        fitness = self.fitness(pop, self.net)  # calculo do primeiro fitness para a pop recem iniciada
         for i in range(self.max_iter):
-            pop = self.evolve(pop)
-            fitness = self.fitness(pop, self.net)
+            pop, fitness = self.evolve(pop, fitness)
             self.history.append(fitness)
-            print('Core: {}, iter: {}, actual fitness: {:.6f}, best_fitness: {:.6f}'.format(core, i, float(fitness.max()), float(
-                max([max(x) for x in self.history]))), end=", ")
+            print('Core: {}, iter: {}, actual fitness: {:.6f}, best_fitness: {:.6f}'.format(core, i, float(fitness.min()), float(
+                min([min(x) for x in self.history]))), end=", ")
             print("p_success: {:.6f}, tempo_exec: {:2f},  sigma: {}, pop: {}".format(self.porcentagem_sucesso, time.time() - start, self.sigma, self.pop_size))
             start = time.time()
 
