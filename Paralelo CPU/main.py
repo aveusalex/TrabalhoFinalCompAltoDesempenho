@@ -25,7 +25,7 @@ def main(args):
 
 
 if __name__ == '__main__':
-    n_jobs = mp.cpu_count()
+    n_jobs = mp.cpu_count()  # aqui é o lugar que se determina o número de núcleos a executar o processamento.
     pop_size = 1000
     pop_size = int(np.ceil(pop_size / n_jobs))
     pool = mp.Pool(n_jobs)
