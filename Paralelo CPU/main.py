@@ -25,7 +25,7 @@ def main(args):
 
 
 if __name__ == '__main__':
-    n_jobs = 1  # mp.cpu_count()
+    n_jobs = mp.cpu_count()
     pop_size = 1000
     pop_size = int(np.ceil(pop_size / n_jobs))
     pool = mp.Pool(n_jobs)
