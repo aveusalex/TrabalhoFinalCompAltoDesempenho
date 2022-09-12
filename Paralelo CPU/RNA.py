@@ -84,8 +84,6 @@ class NeuralNetwork(nn.Module):
         X = normaliza(flat(X))
         y = transforma_y(X, y)
         X = torch.from_numpy(X)
-        X.to(torch.device('cuda'))
-        y.to(torch.device('cuda'))
         return X, y
 
     def run(self):
